@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
 from typing import Any, Union
+import urllib.parse
 
 import httpx
 from fastapi import HTTPException
@@ -28,11 +29,16 @@ async def pass_through_request(client: httpx.AsyncClient, request: ProxyRequest)
     logger.info(f"Received request: {request.method} {request.url}")
 
     url = request.url
+    parsed = urllib.parse.urlparse(url)
+    url = parsed._replace(netloc="backend.raycast.com").geturl()
     if not url.startswith("https://") and url.startswith("http://"):
         url = url.replace("http://", "https://")
 
     logger.debug(f"Forwarding request to {url}")
     headers = request.headers
+    headers["host"] = "backend.raycast.com"
+    headers["connection"] = "keep-alive"
+
     # disable compression, in docker container, it will cause error, unknown reason
     headers["accept-encoding"] = "identity"
     try:

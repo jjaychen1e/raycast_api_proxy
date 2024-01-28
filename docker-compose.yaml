@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  raycast:
+    build: .
+    container_name: raycast
+    env_file:
+      - ./openai.env
+    environment:
+      CERT_FILE: "/data/cert/backend.raycast.com.cert.pem"
+      CERT_KEY: "/data/cert/backend.raycast.com.key.pem"
+      LOG_LEVEL: "INFO"
+    ports:
+      - "9356:443"
+    dns: 
+      - "1.1.1.1"
+    volumes:
+      - "./cert/:/data/cert"
+    restart: unless-stopped
